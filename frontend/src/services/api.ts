@@ -38,4 +38,15 @@ export const registerUser = async (userData: any) => {
 // 3. Get User Profile (ตัวอย่าง: ต้องใช้ ID หรือมี Endpoint getProfile)
 // เนื่องจาก Backend ให้ updateProfile แต่ดึงข้อมูลใช้ Get(':id') 
 // เราจะพักไว้ก่อน รอเชื่อม Context เสร็จ
+
+//4 Product
+export const getAllProduct = async () => {
+    const response = await api.get('/product');
+    return response.data
+};
+
+export const getProductById = async (id: string) => {
+    const response = await api.get(`/products/${id}`);
+    return response.data;
+}
 export default api;
