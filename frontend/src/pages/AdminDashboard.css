@@ -1,0 +1,152 @@
+.admin-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #78a6ab;
+}
+
+.orange-btn {
+  background-color: #d6451e;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.icon-btn {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* BODY */
+.admin-body {
+  flex: 1;
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* MAIN SECTION */
+.main-section {
+  flex: 3;
+  background-color: #e5e5e5;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.product-form {
+  display: flex;
+  gap: 30px;
+}
+
+/* IMAGE */
+.image-upload {
+  width: 300px;
+  height: 250px;
+  border: 2px dashed #999;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f3f3f3;
+}
+
+.upload-placeholder {
+  text-align: center;
+  font-size: 40px;
+  position: relative;
+}
+
+.plus-icon {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  background: white;
+  border-radius: 50%;
+  padding: 5px 10px;
+  border: 1px solid #aaa;
+  font-size: 18px;
+}
+
+/* FORM */
+.form-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.row {
+  display: flex;
+  gap: 15px;
+}
+
+.row input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  background-color: #f8f8f8;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.small-inputs input {
+  text-align: center;
+}
+
+/* DESCRIPTION */
+.description-section {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.full-input {
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  background: #f8f8f8;
+}
+
+.full-textarea {
+  height: 120px;
+  padding: 15px;
+  border-radius: 20px;
+  border: none;
+  background: #f8f8f8;
+  resize: none;
+}
+
+/* SIDE SECTION */
+.side-section {
+  flex: 1;
+  background-color: #e5e5e5;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.big-orange-btn {
+  background-color: #ffffff;
+  color: black;
+  border: none;
+  padding: 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.side-btn {
+  background-color: #f3f3f3;
+  border: none;
+  padding: 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
