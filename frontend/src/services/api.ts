@@ -49,12 +49,12 @@ export const registerUser = async (userData: any) => {
 // เราจะพักไว้ก่อน รอเชื่อม Context เสร็จ
 
 //4 Product
-export const getAllProduct = async () => {
-    const response = await api.get('/product');
-    return response.data
+export const getAllProducts = async (): Promise<Product[]> => {
+    const response = await api.get('/products');
+    return response.data;
 };
 
-export const getProductById = async (id: string) => {
+export const getProductById = async (id: string): Promise<Product[]> => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
