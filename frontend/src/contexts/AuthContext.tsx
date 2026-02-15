@@ -45,8 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // สมมติว่าเรา Set user จาก username ที่กรอกไปก่อน (เพื่อ UX) 
       // หรือถ้า Backend ส่ง user object มาให้ใช้ data.user
       const userData: User = {
-        username: credentials.username,
-        role: 'user', // Default ไปก่อน (ของจริงต้องดึงจาก DB)
+        ...data.user,
         token: data.access_token 
       };
 
