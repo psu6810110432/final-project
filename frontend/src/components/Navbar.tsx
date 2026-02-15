@@ -38,6 +38,16 @@ const Navbar = () => {
           {/* ส่วนเช็คสถานะ User */}
           {user ? (
             <>
+
+            {/* ---  เมนูสำหรับ Admin เท่านั้น --- */}
+              {user.role === 'admin' && (
+                <li className="nav-item">
+                  <Link to="/admin" className="nav-links" style={{ color: '#ff4d4d' }} onClick={closeMobileMenu}>
+                    ระบบหลังบ้าน (Admin)
+                  </Link>
+                </li>
+              )}
+
               {/* เมนูสำหรับคน Login แล้ว */}
               <li className="nav-item">
                 <Link to="/cart" className="nav-links" onClick={closeMobileMenu}>
