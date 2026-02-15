@@ -24,6 +24,21 @@ export class Product {
   @Column({ nullable: true })
   image: string;
 
+  @Column({ nullable: true })
+  color: string;
+
+  @Column({ nullable: true })
+  width: string;
+
+  @Column({ nullable: true })
+  length: string;
+
+  @Column({ nullable: true })
+  height: string;
+
+  @Column({ default: false })
+  isInstallable: boolean;
+
   @OneToMany(() => CartItem, (cartItem) => cartItem.product)
   cartItems: CartItem[];
 }
