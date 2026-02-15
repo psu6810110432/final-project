@@ -14,6 +14,7 @@ import OrderHistory from './pages/OrderHistory';
 import Review from './pages/Review';
 import Policy from './pages/Policy';
 import './App.css';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Review />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
               </ProtectedRoute>
             } 
           />
