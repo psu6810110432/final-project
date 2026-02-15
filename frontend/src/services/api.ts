@@ -19,6 +19,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image: string;
+}
 // --- API Functions ---
 
 // 1. Login
