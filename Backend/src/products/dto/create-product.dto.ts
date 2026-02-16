@@ -1,48 +1,49 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, Min, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateProductDto {
+class CreateProductVariantDto {
   @IsString()
-  @IsNotEmpty({ message: 'กรุณาระบุชื่อสินค้า' })
-  name: string;
+  @IsNotEmpty()
+  color: string;
 
-  @IsOptional()
   @IsString()
-  description?: string;
+  @IsNotEmpty()
+  material: string;
+
+  @IsString()
+  @IsNotEmpty()
+  size: string;
 
   @IsNumber()
-  @Min(0, { message: 'ราคาสินค้าต้องไม่ติดลบ' })
   price: number;
 
   @IsNumber()
-  @Min(0, { message: 'จำนวนสินค้าต้องไม่ติดลบ' })
   stock: number;
+}
 
-  @IsOptional()
+export class CreateProductDto {
   @IsString()
-  category?: string;
+  @IsNotEmpty()
+  name: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsNumber()
+  price: number; // ราคาโชว์หน้าแรก
+
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsString()
+  @IsOptional()
   image?: string;
 
-  // 👇 เพิ่มฟิลด์ใหม่ให้ครบตามที่คุณแก้ Entity ไปก่อนหน้านี้ พร้อม Decorator
-  @IsOptional()
-  @IsString()
-  color?: string;
-
-  @IsOptional()
-  @IsString()
-  width?: string;
-
-  @IsOptional()
-  @IsString()
-  length?: string;
-
-  @IsOptional()
-  @IsString()
-  height?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isInstallable?: boolean;
+  // 👇 รับค่าเป็น Array ของ Variants
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductVariantDto)
+  variants: CreateProductVariantDto[];
 }
