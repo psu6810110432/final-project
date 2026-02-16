@@ -1,76 +1,27 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import ProtectedRoute from './components/ProtectedRoute'; // Import เข้ามา
-
-// Import Pages (คงเดิม)
-import Landing from './pages/Landing';
+// เดี๋ยวเราค่อยสร้างไฟล์หน้าเหล่านี้ทีหลัง
+import Home from './pages/Home'; 
 import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Profile from './pages/Profile';
-import OrderHistory from './pages/OrderHistory';
-import Review from './pages/Review';
-import Policy from './pages/Policy';
-import './App.css';
 import AdminDashboard from './pages/AdminDashboard';
+import Navbar from './components/Navbar'; // แถบเมนูบนสุดที่มีทุกหน้า
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <div className="container mx-auto mt-4">
+      {/* Navbar อยู่เสมือนทุกหน้า ยกเว้นหน้า Login อาจจะซ่อน */}
+      <Navbar /> 
+      
+      <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Public Routes (ใครก็เข้าได้) */}
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/policy" element={<Policy />} />
-
-          {/* Protected Routes (ต้อง Login ก่อน) */}
-          <Route 
-            path="/cart" 
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/orders" 
-            element={
-              <ProtectedRoute>
-                <OrderHistory />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/review" 
-            element={
-              <ProtectedRoute>
-                <Review />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </div>
     </BrowserRouter>
