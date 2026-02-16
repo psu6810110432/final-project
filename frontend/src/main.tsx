@@ -23,3 +23,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </CartProvider> {/* <--- และปิดตรงนี้ */}    
   </React.StrictMode>,
 )
+

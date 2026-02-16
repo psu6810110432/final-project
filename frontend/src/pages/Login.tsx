@@ -158,97 +158,79 @@
 
 // export default Login;
 
-import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login(formData);
+      navigate('/');
+    } catch (err) {
+      alert('Login Failed');
+    }
+  };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      
-      {/* --- LEFT: Image Section (65%) --- */}
-      <div className="hidden lg:flex w-[65%] relative bg-gray-900">
+    <div className="flex min-h-screen">
+      {/* ฝั่งซ้าย: รูปภาพและข้อความ */}
+      <div className="hidden lg:flex lg:w-3/4 relative">
         <img 
-          src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80" 
-          alt="Living Room" 
-          className="w-full h-full object-cover opacity-60"
+          src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1974" 
+          alt="Interior" 
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 flex flex-col justify-end p-16 text-white pb-24">
-           <h2 className="text-4xl font-bold leading-tight mb-4 drop-shadow-lg">
-             "สร้างพื้นที่ส่วนตัวที่สมบูรณ์แบบของคุณ <br/>
-             ทุกสิ่งที่คุณต้องการเพื่อเปลี่ยนบ้านให้เป็นที่อยู่อาศัยที่อบอุ่น"
-           </h2>
-           <div className="flex items-center gap-2 mt-4 text-sm opacity-80">
-              <span className="w-8 h-8 border-2 border-white rounded flex items-center justify-center font-bold">H</span>
-              homealright.com
-           </div>
+        <div className="absolute inset-0 bg-black/30 flex flex-col justify-center px-20">
+          <h1 className="text-white text-4xl font-bold leading-tight max-w-2xl">
+            "สร้างพื้นที่ส่วนตัวที่สมบูรณ์แบบของคุณ <br />
+            ทุกสิ่งที่คุณต้องการเพื่อเปลี่ยนบ้านให้เป็นที่อยู่อาศัยที่อบอุ่น"
+          </h1>
+          <p className="text-gray-200 mt-4">homealright.com</p>
         </div>
       </div>
 
-      {/* --- RIGHT: Form Section (35%) --- */}
-      <div className="w-full lg:w-[35%] bg-[#91B5B3] flex items-center justify-center p-8">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md text-center">
-          
-          {/* Logo & Header */}
-          <div className="mb-8 flex flex-col items-center">
-             <div className="w-16 h-16 bg-blue-50 text-[#148F96] rounded-full flex items-center justify-center mb-4 border-2 border-[#148F96]">
-               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-             </div>
-             <h2 className="text-2xl font-bold text-gray-800">ลงชื่อเข้าใช้</h2>
+      {/* ฝั่งขวา: ฟอร์ม (พื้นหลังสีฟ้าอ่อน) */}
+      <div className="w-full lg:w-1/4 bg-[#99C4C8] flex items-center justify-center p-8">
+        <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-xl flex flex-col items-center">
+          {/* Logo/Icon */}
+          <div className="w-20 h-20 border-2 border-[#99C4C8] rounded-full flex items-center justify-center mb-4">
+             <div className="text-[#99C4C8] text-4xl">🏠</div>
           </div>
+          
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">ลงชื่อเข้าใช้</h2>
 
-          {/* Form */}
-          <form className="space-y-5">
+          <form onSubmit={handleSubmit} className="w-full space-y-4">
+            <input 
+              type="text" placeholder="ชื่อผู้ใช้" 
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-full outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setFormData({...formData, username: e.target.value})}
+            />
+            <input 
+              type="password" placeholder="รหัสผ่าน" 
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-full outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
             
-            {/* Username Input */}
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="ชื่อผู้ใช้" 
-                className="w-full pl-5 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#148F96] text-sm"
-              />
-              <User size={18} className="absolute right-4 top-3.5 text-gray-400" />
+            <div className="flex items-center gap-2 px-2">
+              <input type="checkbox" id="remember" className="rounded" />
+              <label htmlFor="remember" className="text-xs text-gray-500">จดจำฉัน</label>
             </div>
 
-            {/* Password Input */}
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                placeholder="รหัสผ่าน" 
-                className="w-full pl-5 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#148F96] text-sm"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
-              </button>
-            </div>
-
-            {/* Options */}
-            <div className="flex items-center justify-between text-xs text-gray-500 px-2">
-               <label className="flex items-center gap-2 cursor-pointer">
-                 <input type="checkbox" className="rounded border-gray-300 text-[#148F96] focus:ring-[#148F96]" />
-                 จดจำฉัน
-               </label>
-               <a href="#" className="hover:text-[#148F96]">ลืมรหัสผ่าน?</a>
-            </div>
-
-            {/* Submit Button */}
-            <button className="w-full bg-[#D65A31] hover:bg-[#b54622] text-white py-3 rounded-full font-bold shadow-lg transition-transform active:scale-95">
+            <button type="submit" className="w-full bg-[#D65A31] text-white py-3 rounded-full font-bold shadow-lg hover:bg-[#b54622] transition">
               ลงชื่อเข้าใช้
             </button>
-
           </form>
 
-          {/* Footer */}
-          <p className="mt-8 text-xs text-gray-400">
-            ยังไม่มีบัญชีใช่ไหม? <Link to="/register" className="text-[#148F96] font-bold hover:underline">ลงทะเบียน</Link>
-          </p>
-
+          <div className="mt-6 flex flex-col items-center gap-2 text-xs">
+            <p className="text-gray-500">ยังไม่มีบัญชีผู้ใช้? <Link to="/register" className="text-blue-500">ลงชื่อเข้าใช้</Link></p>
+            <p className="text-gray-400">ลืมรหัสผ่านใช่ไหม? <span className="text-blue-500 cursor-pointer">กดที่นี่</span></p>
+          </div>
         </div>
       </div>
     </div>
