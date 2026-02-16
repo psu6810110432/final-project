@@ -150,3 +150,58 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+/* ... existing code ... */
+
+/* CATEGORY SIDEBAR STYLES */
+.side-section h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.category-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+}
+
+.category-item {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  font-size: 14px;
+}
+
+.add-category-box {
+  margin-top: auto; /* ดันไปด้านล่างถ้ามีพื้นที่เหลือ */
+  padding-top: 20px;
+  border-top: 1px solid #ccc;
+}
+
+.add-category-box input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  background-color: #fff;
+  margin-bottom: 5px;
+  box-sizing: border-box; /* สำคัญเพื่อให้ padding ไม่ทำลาย layout */
+}
+
+.confirm-btn {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}

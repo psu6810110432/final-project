@@ -16,6 +16,9 @@ export class Product {
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   price: number;
 
+  @Column('int', { default: 0 })
+  stock: number;
+  
   @Column({ default: 'General' }) // เพิ่มหมวดหมู่
   category: string;
 
