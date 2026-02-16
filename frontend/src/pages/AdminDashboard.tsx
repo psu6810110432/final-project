@@ -1,46 +1,65 @@
 import React, { useState } from "react";
 import "./AdminDashboard.css";
-import { createProduct } from "../services/api"; // [เพิ่ม] import api
+// import axios from "axios"; // อย่าลืม import axios หรือ api instance ของคุณ
+
+// Interface สำหรับ Variant
+interface Variant {
+  color: string;
+  material: string;
+  size: string;
+  price: string;
+  stock: string;
+}
 
 const AdminDashboard: React.FC = () => {
-  // [แก้ไข] สร้าง State เก็บข้อมูลสินค้า
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    category: "",
-    stock: "",
-    color: "",      // ถ้า backend มี field นี้
-    material: "",   // ถ้า backend มี field นี้
-    image: "",
-    description: "",
-  });
+  // State ข้อมูลหลัก
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState(""); // ราคาเริ่มต้น
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
-  // [เพิ่ม] ฟังก์ชันจัดการเมื่อพิมพ์ข้อมูล
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // State สำหรับ Variants (เริ่มต้นมี 1 แถว)
+  const [variants, setVariants] = useState<Variant[]>([
+    { color: "", material: "", size: "", price: "", stock: "" },
+  ]);
+
+  // ฟังก์ชันจัดการ input ของ Variant แต่ละแถว
+  const handleVariantChange = (index: number, field: keyof Variant, value: string) => {
+    const newVariants = [...variants];
+    newVariants[index][field] = value;
+    setVariants(newVariants);
+  };
+
+  // ฟังก์ชันเพิ่มแถว Variant
+  const addVariant = () => {
+    setVariants([...variants, { color: "", material: "", size: "", price: "", stock: "" }]);
+  };
+
+  // ฟังก์ชันลบแถว Variant
+  const removeVariant = (index: number) => {
+    const newVariants = variants.filter((_, i) => i !== index);
+    setVariants(newVariants);
   };
 
   const handleConfirm = async () => {
-    try {
-        // แปลงข้อมูลให้ตรงกับ Type ที่ Backend ต้องการ (เช่น price, stock ต้องเป็น number)
-        const payload = {
-            ...formData,
-            price: parseFloat(formData.price),
-            stock: parseInt(formData.stock),
-            // color, material ส่งไปได้ถ้า backend รองรับ หรือเก็บรวมใน description ตาม design
-        };
+    // เตรียมข้อมูลส่ง Backend
+    const payload = {
+      name,
+      price: parseFloat(price),
+      category,
+      description,
+      image: imageUrl,
+      variants: variants.map(v => ({
+        ...v,
+        price: parseFloat(v.price),
+        stock: parseInt(v.stock)
+      }))
+    };
 
-        await createProduct(payload); // เรียก API
-        alert("เพิ่มสินค้าสำเร็จ!");
-        
-        // ล้างค่าในฟอร์มหลังเพิ่มเสร็จ
-        setFormData({
-            name: "", price: "", category: "", stock: "", color: "", material: "", image: "", description: ""
-        });
-    } catch (error) {
-        console.error("Error creating product:", error);
-        alert("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
-    }
+    console.log("Sending Payload:", payload);
+    alert("ข้อมูลพร้อมส่ง (ดูใน Console) - กรุณาเชื่อมต่อ API");
+    // await api.post('/products', payload);
   };
 
   return (
@@ -48,109 +67,58 @@ const AdminDashboard: React.FC = () => {
       <div className="admin-body">
         <div className="main-section">
           <div className="product-form">
-            {/* Image Upload Preview */}
+            {/* Image Upload */}
             <div className="image-upload">
-              {formData.image ? (
-                <img src={formData.image} alt="preview" className="preview-img" />
+              {imageUrl ? (
+                <img src={imageUrl} alt="preview" className="preview-img" />
               ) : (
-                <div className="upload-placeholder">
-                  <span>🖼️</span>
-                  <div className="plus-icon">＋</div>
-                </div>
+                <div className="upload-placeholder"><span>🖼️</span></div>
               )}
             </div>
 
-            {/* Form Fields: ต้องใส่ name, value, onChange ให้ครบทุกช่อง */}
+            {/* General Info */}
             <div className="form-fields">
               <div className="row">
-                <input 
-                  name="name" 
-                  placeholder="เพิ่มสินค้า (ชื่อ)" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                />
-                <input 
-                  name="price" 
-                  type="number"
-                  placeholder="เพิ่มราคาสินค้า" 
-                  value={formData.price} 
-                  onChange={handleChange} 
-                />
+                <input placeholder="ชื่อสินค้า" value={name} onChange={e => setName(e.target.value)} />
+                <input placeholder="ราคาเริ่มต้น" type="number" value={price} onChange={e => setPrice(e.target.value)} />
               </div>
-
               <div className="row">
-                <input 
-                  name="category" 
-                  placeholder="เพิ่มหมวดหมู่สินค้า" 
-                  value={formData.category} 
-                  onChange={handleChange} 
-                />
-                <input 
-                  name="stock" 
-                  type="number"
-                  placeholder="เพิ่มจำนวนสินค้า" 
-                  value={formData.stock} 
-                  onChange={handleChange} 
-                />
-              </div>
-
-              <div className="row">
-                <input 
-                  name="color" 
-                  placeholder="เพิ่มสีสินค้า" 
-                  value={formData.color} 
-                  onChange={handleChange} 
-                />
-              </div>
-
-              <div className="row">
-                <input 
-                  name="material" 
-                  placeholder="เพิ่มวัสดุสินค้า" 
-                  value={formData.material} 
-                  onChange={handleChange} 
-                />
-              </div>
-
-              {/* Image URL Input */}
-              <div className="row">
-                <input
-                  name="image"
-                  placeholder="เพิ่ม Image Address (URL)"
-                  value={formData.image}
-                  onChange={handleChange}
-                />
+                <input placeholder="หมวดหมู่" value={category} onChange={e => setCategory(e.target.value)} />
+                <input placeholder="Image URL" value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
               </div>
             </div>
           </div>
 
-          {/* Description Section */}
           <div className="description-section">
-            <input
-              className="full-input"
-              name="description"
-              placeholder="เพิ่มรายละเอียดสินค้า (สั้นๆ)"
-              value={formData.description}
-              onChange={handleChange}
-            />
-            <textarea
-              className="full-textarea"
-              placeholder="เพิ่มรายละเอียดเพิ่มเติมสินค้า (ถ้ามี)"
-            />
+            <textarea className="full-textarea" placeholder="รายละเอียดสินค้า" value={description} onChange={e => setDescription(e.target.value)} />
+          </div>
+
+          {/* 👇 ส่วนจัดการ Variants (Best Practice) */}
+          <div className="variants-section" style={{ marginTop: '20px' }}>
+            <h3>ตัวเลือกสินค้า (สี, วัสดุ, ขนาด)</h3>
+            {variants.map((variant, index) => (
+              <div key={index} className="variant-row" style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input placeholder="สี" value={variant.color} onChange={e => handleVariantChange(index, 'color', e.target.value)} style={{flex: 1}} />
+                <input placeholder="วัสดุ" value={variant.material} onChange={e => handleVariantChange(index, 'material', e.target.value)} style={{flex: 1}} />
+                <input placeholder="ขนาด (กxยxส)" value={variant.size} onChange={e => handleVariantChange(index, 'size', e.target.value)} style={{flex: 1}} />
+                <input placeholder="ราคา" type="number" value={variant.price} onChange={e => handleVariantChange(index, 'price', e.target.value)} style={{width: '80px'}} />
+                <input placeholder="จำนวน" type="number" value={variant.stock} onChange={e => handleVariantChange(index, 'stock', e.target.value)} style={{width: '80px'}} />
+                
+                {variants.length > 1 && (
+                  <button onClick={() => removeVariant(index)} style={{ background: 'red', color: 'white', border: 'none', cursor: 'pointer' }}>X</button>
+                )}
+              </div>
+            ))}
+            <button onClick={addVariant} style={{ background: '#4CAF50', color: 'white', padding: '5px 10px', border: 'none', cursor: 'pointer' }}>+ เพิ่มตัวเลือก</button>
           </div>
 
           <div style={{ marginTop: "25px", textAlign: "center" }}>
-            <button className="confirm-btn" onClick={handleConfirm}>
-              ยืนยันการเพิ่มสินค้า
-            </button>
+            <button className="confirm-btn" onClick={handleConfirm}>ยืนยันการเพิ่มสินค้า</button>
           </div>
         </div>
-
-        {/* Sidebar */}
+        
         <div className="side-section">
-          <button className="big-orange-btn">เพิ่มรายการสินค้า</button>
-          <button className="side-btn">แก้ไข/ลบ</button>
-          <button className="side-btn">การจัดการคำสั่งซื้อ</button>
+           {/* Sidebar content */}
         </div>
       </div>
     </div>

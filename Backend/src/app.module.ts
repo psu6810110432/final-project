@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 // 👇 1. Import เพิ่มสำหรับ Serve Static Files
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { join } from 'path';
     ReviewsModule,
     CartItemsModule,
     AuthModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
