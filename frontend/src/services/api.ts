@@ -58,4 +58,8 @@ export const getProductById = async (id: string): Promise<Product[]> => {
     const response = await api.get(`/products/${id}`);
     return response.data;
 }
+export const createProduct = async (productData: any) => {
+    const reponse = await api.post('/products', productData);
+    return reponse.data;
+}
 export default api;
