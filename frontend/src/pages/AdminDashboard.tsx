@@ -219,6 +219,35 @@ const AdminDashboard: React.FC = () => {
             </>
           )}
 
+        {/* ส่วนที่ 2: หน้าแก้ไข/ลบคุณสมบัติ (ย้ายจาก Sidebar มาไว้หน้าหลัก) */}
+          {activeView === 'manageSystem' && (
+            <div className="manage-system-view">
+              <h2>แก้ไข / ลบคุณสมบัติ</h2>
+              <div className="tab-control-bar">
+                <button onClick={() => setActiveTab('category')} className={activeTab === 'category' ? 'active' : ''}>สินค้า</button>
+                <button onClick={() => setActiveTab('room')} className={activeTab === 'room' ? 'active' : ''}>ห้อง</button>
+                <button onClick={() => setActiveTab('feature')} className={activeTab === 'feature' ? 'active' : ''}>คุณสมบัติ</button>
+              </div>
+
+              <div className="master-data-container">
+                <div className="category-list">
+                  {(activeTab === 'category' ? categoriesList : activeTab === 'room' ? roomsList : featuresList).map(i => (
+                    <div key={i.id} className="category-item">
+                      <span>{activeTab === 'category' ? '📂' : activeTab === 'room' ? '🏠' : '✨'} {i.name}</span>
+                      {/* ปุ่มแก้ไข/ลบจะเพิ่มใน Phase ถัดไป */}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="add-category-box">
+                   <h4>เพิ่ม {activeTab === 'category' ? 'หมวดหมู่' : activeTab === 'room' ? 'ห้อง' : 'คุณสมบัติ'} ใหม่</h4>
+                   <input placeholder={`ชื่อ...`} value={newItemName} onChange={(e) => setNewItemName(e.target.value)} />
+                   <button className="orange-btn" onClick={handleAddMasterData}>บันทึกข้อมูล</button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
         
         {/* ---------------------------------------------------------
