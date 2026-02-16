@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star, Minus, Plus, ShoppingCart, Check, User, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar'; // อย่าลืม import Navbar ถ้าใช้แยก
+import { useCart } from '../contexts/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -11,6 +12,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState('brown');
   const [addInstallation, setAddInstallation] = useState(false);
+  const { addToCart } = useCart(); // <--- เรียกใช้ฟังก์ชัน
 
   // --- MOCK DATA (จำลองข้อมูลให้ตรงกับรูป) ---
   const product = {
@@ -144,7 +146,9 @@ const ProductDetail = () => {
                     <p className="text-[10px] text-gray-400 mt-1 text-center">มีสินค้าพร้อมส่ง {product.stock} ชิ้น</p>
                 </div>
 
-                <button className="bg-[#D65A31] hover:bg-[#b54622] text-white py-3 px-8 rounded font-bold text-lg shadow-lg flex items-center gap-2 transition-transform active:scale-95">
+                <button 
+                onClick={() => addToCart(product, quantity)}
+                className="bg-[#D65A31] hover:bg-[#b54622] text-white py-3 px-8 rounded font-bold text-lg shadow-lg flex items-center gap-2 transition-transform active:scale-95">
                   เพิ่มลงตะกร้า
                 </button>
               </div>
