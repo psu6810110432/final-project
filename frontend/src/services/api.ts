@@ -65,4 +65,20 @@ export const createProduct = async (productData: any) => {
     const reponse = await api.post('/products', productData);
     return reponse.data;
 };
+
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export const getAllCategories = async (): Promise<Category[]> => {
+  const response = await api.get('/categories');
+  return response.data;
+};
+
+export const createCategory = async (name: string) => {
+  const response = await api.post('/categories', { name });
+  return response.data;
+};
+
 export default api;
