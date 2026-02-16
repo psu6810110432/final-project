@@ -248,6 +248,14 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* ส่วนที่ 3: หน้าจัดการคำสั่งซื้อ (Placeholder) */}
+          {activeView === 'manageOrders' && (
+            <div className="manage-orders-view">
+              <h2>จัดการคำสั่งซื้อ</h2>
+              <p style={{textAlign: 'center', marginTop: '50px', color: '#888'}}>ส่วนจัดการคำสั่งซื้อจะอยู่ตรงนี้</p>
+            </div>
+          )}
+
         </div>
         
         {/* ---------------------------------------------------------
