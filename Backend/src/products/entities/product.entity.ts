@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { CartItem } from '../../cart_items/entities/cart_item.entity';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity()
 export class Product {
@@ -12,11 +13,8 @@ export class Product {
   @Column({ type: 'text', nullable: true }) // เพิ่มรายละเอียดสินค้า
   description: string;
 
-  @Column({ default: 0 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   price: number;
-
-  @Column({ default: 0 })
-  stock: number;
 
   @Column({ default: 'General' }) // เพิ่มหมวดหมู่
   category: string;
@@ -24,20 +22,17 @@ export class Product {
   @Column({ nullable: true })
   image: string;
 
-  @Column({ nullable: true })
-  color: string;
-
-  @Column({ nullable: true })
-  width: string;
-
-  @Column({ nullable: true })
-  length: string;
-
-  @Column({ nullable: true })
-  height: string;
+  @OneToMany(() => ProductVariant, (variant) => variant.product, { cascade: true })
+  variants: ProductVariant[];
 
   @Column({ default: false })
   isInstallable: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.product)
   cartItems: CartItem[];
