@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CategoriesModule } from './categories/categories.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { FeaturesModule } from './features/features.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { CategoriesModule } from './categories/categories.module';
     CartItemsModule,
     AuthModule,
     CategoriesModule,
+    RoomsModule,
+    FeaturesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

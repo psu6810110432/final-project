@@ -1,0 +1,23 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Room } from './entities/room.entity';
+
+@Injectable()
+export class RoomsService {
+  constructor(
+    @InjectRepository(Room)
+    private roomsRepository: Repository<Room>,
+  ) {}
+
+  create(createRoomDto: { name: string }) {
+    const room = this.roomsRepository.create(createRoomDto);
+    return this.roomsRepository.save(room);
+  }
+
+  findAll() {
+    return this.roomsRepository.find(); // ✅ ต้อง return เป็น Array จาก DB
+  }
+
+  // ส่วนอื่นๆ (findOne, update, remove) ปล่อยไว้ก่อนได้ครับ
+}

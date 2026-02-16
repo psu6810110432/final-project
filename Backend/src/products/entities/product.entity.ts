@@ -18,9 +18,17 @@ export class Product {
 
   @Column('int', { default: 0 })
   stock: number;
-  
-  @Column({ default: 'General' }) // เพิ่มหมวดหมู่
-  category: string;
+
+  @Column({ default: 'General' })
+  category: string; // หมวดหมู่สินค้า (Single Select)
+
+  // 👇 เพิ่มหมวดหมู่ห้อง (Single Select)
+  @Column({ nullable: true })
+  room: string; 
+
+  // 👇 เพิ่มคุณสมบัติพิเศษ (Multi Select) - เก็บเป็น Array ของ String
+  @Column("simple-array", { nullable: true }) 
+  features: string[];
 
   @Column({ nullable: true })
   image: string;

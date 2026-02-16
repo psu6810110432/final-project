@@ -81,4 +81,27 @@ export const createCategory = async (name: string) => {
   return response.data;
 };
 
+// 6. Rooms
+export interface Room { id: number; name: string; }
+
+export const getAllRooms = async (): Promise<Room[]> => {
+  const response = await api.get('/rooms');
+  return response.data;
+};
+
+export const createRoom = async (name: string) => {
+  return await api.post('/rooms', { name });
+};
+
+// 7. Features
+export interface Feature { id: number; name: string; }
+
+export const getAllFeatures = async (): Promise<Feature[]> => {
+  const response = await api.get('/features');
+  return response.data;
+};
+
+export const createFeature = async (name: string) => {
+  return await api.post('/features', { name });
+};
 export default api;

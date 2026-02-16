@@ -34,6 +34,14 @@ export class CreateProductDto {
   price: number; // ราคาโชว์หน้าแรก
 
   @IsString()
+  @IsOptional()
+  room?: string;
+
+  @IsArray()
+  @IsOptional()
+  features?: string[];
+  
+  @IsString()
   @IsNotEmpty()
   category: string;
 
