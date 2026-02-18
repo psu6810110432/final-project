@@ -40,7 +40,7 @@ export const loginUser = async (credentials: { username: string; password: strin
 // 2. Register
 export const registerUser = async (userData: any) => {
   // ยิงไปที่ UsersController @Post('users')
-  const response = await api.post('/auth/register', userData);
+  const response = await api.post('/users', userData);
   return response.data;
 };
 

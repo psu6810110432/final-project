@@ -1,6 +1,7 @@
 import { 
   Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ForbiddenException,
-  UseInterceptors, UploadedFile, BadRequestException
+  UseInterceptors, UploadedFile, BadRequestException, ParseFilePipe, 
+  MaxFileSizeValidator, FileTypeValidator
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,8 +11,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import sharp from 'sharp';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Controller('users')
 export class UsersController {
@@ -24,29 +26,48 @@ export class UsersController {
   }
 
   // ---------------------------------------------------------
-  // ✅ แก้ไขโปรไฟล์ตัวเอง + อัปโหลดรูปภาพ 🖼️
+  // ✅ แก้ไขโปรไฟล์ตัวเอง + อัปโหลดรูปภาพ (มี Sharp Resize) 🖼️
   // ---------------------------------------------------------
   @Patch('profile')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/profiles',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, `user-${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
-  }))
+  @UseInterceptors(FileInterceptor('file')) // รับไฟล์ชื่อ 'file' (ไม่ต้องใช้ storage diskStorage แล้ว เพราะเราจะจัดการเอง)
   async updateProfile(
     @Req() req, 
     @Body() body: UpdateUserDto, 
-    @UploadedFile() file?: Express.Multer.File 
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false, // ไม่บังคับว่าต้องมีรูป (เผื่อแก้แค่ชื่อ)
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // Max 5MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }), // รูปเท่านั้น
+        ],
+      }),
+    ) file?: Express.Multer.File 
   ) {
+    // ถ้ามีการอัปโหลดไฟล์มาด้วย ให้ทำการ Resize
     if (file) {
-      body.userImage = file.filename;
+      const filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+      const uploadPath = path.join('./uploads/profiles', filename);
+
+      // สร้างโฟลเดอร์ถ้ายังไม่มี
+      if (!fs.existsSync('./uploads/profiles')) {
+        fs.mkdirSync('./uploads/profiles', { recursive: true });
+      }
+
+      // ✅ ใช้ Sharp ย่อรูปและบันทึก
+      await sharp(file.buffer)
+        .resize(300, 300, { // บังคับขนาด 300x300
+          fit: 'cover',
+        })
+        .toFormat('jpeg')
+        .jpeg({ quality: 80 })
+        .toFile(uploadPath);
+      
+      // เอาชื่อไฟล์ใส่เข้าไปใน DTO เพื่อไปอัปเดตลง DB
+      body.userImage = filename;
     }
     
-    // ✅ ใช้ ID จาก Token เสมอ เพื่อความปลอดภัย
+    // อัปเดตข้อมูล (ID เอาจาก Token เสมอ)
     return this.usersService.update(req.user.id, body); 
   }
 
@@ -58,37 +79,46 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  // ✅ เพิ่ม Endpoint ดึง Profile ของตัวเอง (ที่ Frontend ต้องใช้)
+  @Get('profile/me')
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@Req() req) {
+    return this.usersService.findOne(req.user.id);
+  }
+
   // 3. ดูข้อมูล User ตาม ID (Secure 🔒)
   @Get(':id')
   @UseGuards(AuthGuard('jwt')) 
   findOne(@Param('id') id: string, @Req() req) {
-    // 🛡️ Security Check: ต้องเป็น Admin หรือ เจ้าของ ID เท่านั้น
     if (req.user.role !== 'admin' && req.user.id !== id) {
         throw new ForbiddenException('คุณไม่มีสิทธิ์ดูข้อมูลผู้ใช้นี้');
     }
     return this.usersService.findOne(id);
   }
 
-  // 4. แก้ไขข้อมูล (Admin)
+  // 4. แก้ไขข้อมูลโดย Admin (แบบมี Sharp ด้วยก็ได้ ถ้าขยันทำ)
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
-  @UseInterceptors(FileInterceptor('file', {
-      storage: diskStorage({
-      destination: './uploads/profiles', 
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, `user-${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
-  }))
-  update(
+  @UseInterceptors(FileInterceptor('file')) // ใช้ Sharp เหมือนกัน
+  async update(
     @Param('id') id: string, 
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file?: Express.Multer.File
   ) {
     if (file) {
-      updateUserDto.userImage = file.filename;
+      const filename = `user-${id}-${Date.now()}.jpeg`;
+      const uploadPath = path.join('./uploads/profiles', filename);
+      
+      if (!fs.existsSync('./uploads/profiles')) fs.mkdirSync('./uploads/profiles', { recursive: true });
+
+      await sharp(file.buffer)
+        .resize(300, 300, { fit: 'cover' })
+        .toFormat('jpeg')
+        .jpeg({ quality: 80 })
+        .toFile(uploadPath);
+
+      updateUserDto.userImage = filename;
     }
     return this.usersService.update(id, updateUserDto);
   }

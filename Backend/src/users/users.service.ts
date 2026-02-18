@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common'; // ✅ เพิ่ม ConflictException
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -14,8 +14,11 @@ export class UsersService {
   ) {}
 
   // Helper function: ลบ password ออกจาก user object
+  // (ปรับให้รองรับการลบ field อื่นๆ ถ้าจำเป็นในอนาคต)
   private sanitizeUser(user: User): User {
-    if (user) delete (user as any).password;
+    if (user) {
+        delete (user as any).password;
+    }
     return user;
   }
 
@@ -40,12 +43,13 @@ export class UsersService {
 
     // 3. ถ้าไม่ซ้ำ ก็ดำเนินการสร้าง User ใหม่ตามปกติ
     const newUser = this.usersRepository.create(createUserDto);
-    // newUser.role = 'user'; // (ปกติ default ใน Entity จะเป็น user อยู่แล้ว แต่ใส่ไว้ก็ดีครับ)
+    // newUser.role = 'user'; // (ปกติ default ใน Entity จะเป็น user อยู่แล้ว)
+    
     const salt = await bcrypt.genSalt();
     newUser.password = await bcrypt.hash(createUserDto.password, salt);
     
-    await this.usersRepository.save(newUser);
-    return this.sanitizeUser(newUser); // ✅ ส่งกลับแบบไม่มี password
+    const savedUser = await this.usersRepository.save(newUser);
+    return this.sanitizeUser(savedUser); // ✅ ส่งกลับแบบไม่มี password
   }
 
   async findAll() { 
@@ -59,18 +63,16 @@ export class UsersService {
       return this.sanitizeUser(user); // ✅ ลบ password
   }
 
+  // ใช้สำหรับ Login (ต้องการ Password) หรือเช็คภายใน
   async findOneByUsername(username: string) {
-    // ⚠️ อันนี้ต้อง 'มี password' เพราะต้องเอาไปเช็คตอน Login
-    // ห้ามใช้ใน Controller ที่ส่งข้อมูลกลับหา User โดยตรง
     return await this.usersRepository.findOneBy({ username });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    // ต้องใช้ findOne แบบติด password มาก่อน เพื่อมา update
-    // แต่เราใช้ findOneBy ({ id }) แทน findOne() ของเรา เพราะ findOne() ของเราลบ password ไปแล้ว
     const user = await this.usersRepository.findOneBy({ id }); 
     if (!user) throw new NotFoundException('User not found');
 
+    // ถ้ามีการแก้รหัสผ่าน ต้อง Hash ใหม่ก่อน
     if (updateUserDto.password) {
       const salt = await bcrypt.genSalt();
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
@@ -96,5 +98,21 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) throw new NotFoundException('User not found');
     return await this.usersRepository.remove(user);
+  }
+
+  // ✅ ฟังก์ชันอัปเดตรูปโปรไฟล์ (ที่คุณต้องการเพิ่ม)
+  async updateProfileImage(userId: string, filename: string) {
+    // เรียก findOneBy ID ตรงๆ เพื่อให้ได้ Object เต็ม (รวม Password) มาก่อนบันทึก
+    // (ถ้าใช้ this.findOne มันจะลบ password ออก ทำให้ตอน save อาจมีปัญหาข้อมูลหาย)
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    
+    if (!user) {
+        throw new NotFoundException('User not found');
+    }
+
+    user.userImage = filename; // ✅ บันทึกชื่อไฟล์ลง DB
+    
+    const savedUser = await this.usersRepository.save(user);
+    return this.sanitizeUser(savedUser); // ลบ password ก่อนส่งกลับ
   }
 }

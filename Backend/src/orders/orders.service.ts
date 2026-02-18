@@ -13,15 +13,12 @@ export class OrdersService {
     @InjectRepository(Order) private ordersRepository: Repository<Order>,
     @InjectRepository(Product) private productsRepository: Repository<Product>,
     @InjectRepository(CartItem) private cartItemsRepository: Repository<CartItem>,
-    private dataSource: DataSource,
+    private dataSource: DataSource, // ✅ Inject DataSource ตรงนี้ครั้งเดียวพอ
   ) {}
 
-  // ... (checkout logic เหมือนเดิม) ...
+  // 1. Checkout (สร้างคำสั่งซื้อ)
   async checkout(user: User, address: string) {
-     // (คงโค้ดเดิมไว้เลยครับ ไม่ต้องแก้)
-     // แต่เช็คให้ชัวร์ว่า shippingAddress: address || user.address อยู่แล้ว
-     // ...
-     const cartItems = await this.cartItemsRepository.find({
+    const cartItems = await this.cartItemsRepository.find({
       where: { user: { id: user.id } },
       relations: ['product'],
     });
@@ -39,6 +36,7 @@ export class OrdersService {
       let totalAmountInstallation = 0;
 
       for (const item of cartItems) {
+        // เช็คสต็อก
         if (item.product.stock < item.quantity) {
           throw new BadRequestException(`สินค้า ${item.product.name} เหลือไม่พอ`);
         }
@@ -51,6 +49,7 @@ export class OrdersService {
 
       const totalAmount = totalAmountProduct + totalAmountInstallation;
 
+      // สร้าง Order
       const order = this.ordersRepository.create({
         user: user,
         totalAmountProduct,
@@ -62,6 +61,7 @@ export class OrdersService {
       });
       const savedOrder = await queryRunner.manager.save(order);
 
+      // สร้าง Order Items และตัดสต็อก
       for (const item of cartItems) {
         const orderItem = queryRunner.manager.create(OrderItem, {
           order: savedOrder,
@@ -72,11 +72,14 @@ export class OrdersService {
         });
         await queryRunner.manager.save(orderItem);
 
+        // ตัดสต็อกสินค้า
         item.product.stock -= item.quantity;
         await queryRunner.manager.save(item.product);
       }
 
+      // ลบตะกร้า
       await queryRunner.manager.delete(CartItem, { user: { id: user.id } });
+      
       await queryRunner.commitTransaction();
 
       return {
@@ -93,7 +96,7 @@ export class OrdersService {
     }
   }
 
-  // ✅ แก้ไข: รับ userId และ role เพื่อเช็คสิทธิ์
+  // 2. ดูรายละเอียด Order (เจ้าของ + Admin)
   async findOne(orderId: string, userId: string, role: string) {
     const order = await this.ordersRepository.findOne({
       where: { id: orderId },
@@ -110,6 +113,7 @@ export class OrdersService {
     return order;
   }
 
+  // 3. ดูประวัติการสั่งซื้อของตัวเอง
   async findMyOrders(userId: string) {
     return this.ordersRepository.find({
       where: { user: { id: userId } },
@@ -118,36 +122,51 @@ export class OrdersService {
     });
   }
 
-  // ✅ แก้ไข: เช็คสิทธิ์ก่อนอัปสลิป
+  // 4. อัปโหลดสลิป (User + Admin)
   async updatePaymentSlip(orderId: string, fileName: string, userId: string, role: string) {
-    const order = await this.ordersRepository.findOne({ 
-        where: { id: orderId },
-        relations: ['user'] 
-    });
-    
-    if (!order) throw new NotFoundException('ไม่พบคำสั่งซื้อ');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction(); // เริ่ม Transaction
 
-    // 🔒 Security Check
-    if (role !== 'admin' && order.user.id !== userId) {
-        throw new ForbiddenException('คุณไม่มีสิทธิ์แก้ไขคำสั่งซื้อนี้');
+    try {
+        // ใช้ manager ของ queryRunner แทน repository ปกติ
+        const order = await queryRunner.manager.findOne(Order, { 
+            where: { id: orderId },
+            relations: ['user'] 
+        });
+        
+        if (!order) throw new NotFoundException('ไม่พบคำสั่งซื้อ');
+
+        // 🔒 Security Check
+        if (role !== 'admin' && order.user.id !== userId) {
+            throw new ForbiddenException('คุณไม่มีสิทธิ์แก้ไขคำสั่งซื้อนี้');
+        }
+
+        order.paymentSlipImage = fileName;
+        order.status = 'WAITING_FOR_VERIFICATION'; 
+        
+        await queryRunner.manager.save(order); // Save ผ่าน Transaction
+        
+        await queryRunner.commitTransaction(); // ยืนยันการบันทึก
+        return { message: 'อัปโหลดสลิปเรียบร้อย', fileName };
+
+    } catch (err) {
+        await queryRunner.rollbackTransaction(); // ถ้าพลาด ยกเลิกทั้งหมด
+        throw err;
+    } finally {
+        await queryRunner.release(); // ปล่อย Connection
     }
-
-    order.paymentSlipImage = fileName;
-    order.status = 'WAITING_FOR_VERIFICATION'; 
-    await this.ordersRepository.save(order);
-    
-    return { message: 'อัปโหลดสลิปเรียบร้อย', fileName };
   }
 
-// 5. ดูออเดอร์ทั้งหมดในระบบ (Admin)
+  // 5. ดูออเดอร์ทั้งหมดในระบบ (Admin)
   async findAll() {
     return this.ordersRepository.find({
-      // ✅ เพิ่ม 'items.product' เข้าไปใน array นี้ครับ
       relations: ['user', 'items', 'items.product'], 
       order: { orderDate: 'DESC' }
     });
   }
 
+  // 6. อัปเดตสถานะ (Admin) + คืนสต็อกถ้า Cancel
   async updateStatus(orderId: string, status: string) {
     const order = await this.ordersRepository.findOne({
       where: { id: orderId },
@@ -156,6 +175,7 @@ export class OrdersService {
 
     if (!order) throw new NotFoundException('ไม่พบคำสั่งซื้อ');
 
+    // ถ้าเปลี่ยนสถานะเป็น CANCELLED และสถานะเดิมไม่ใช่ CANCELLED -> คืนสต็อก
     if (status === 'CANCELLED' && order.status !== 'CANCELLED') {
       for (const item of order.items) {
         const product = item.product;
