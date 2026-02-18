@@ -31,7 +31,13 @@ export class CreateProductDto {
   description?: string;
 
   @IsNumber()
+  @Type(() => Number)
   price: number; // ราคาโชว์หน้าแรก
+
+  // 👈 เพิ่ม stock เข้าไปในคลาสหลักด้วย เพราะหน้า Home เรียกใช้ค่านี้
+  @IsNumber()
+  @Type(() => Number) // 👈 เพิ่มบรรทัดนี้
+  stock: number;
 
   @IsString()
   @IsOptional()

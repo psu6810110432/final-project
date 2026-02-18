@@ -329,7 +329,7 @@ const Home = () => {
     let images: string[] = [];
     try {
         // @ts-ignore
-        const rawImages = product.images;
+        const rawImages = product.image;
         if (Array.isArray(rawImages)) {
             images = rawImages;
         } else if (typeof rawImages === 'string') {
