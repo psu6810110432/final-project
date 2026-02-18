@@ -112,39 +112,35 @@ export class CartItemsService {
     return await this.cartItemsRepository.save(cartItem);
   }
 
-  // 5. ดึงข้อมูลตะกร้า + สรุปยอดเงิน (Logic เดิมของคุณที่สำคัญมาก! 💰)
+// ใน Backend/src/cart_items/cart_items.service.ts
+
   async getCartSummary(userId: string) {
     const cartItems = await this.cartItemsRepository.find({
-      where: { user: { id: userId } }, // ✅ ดึงเฉพาะของตัวเอง
+      where: { user: { id: userId } },
       relations: ['product'],
     });
 
     let subTotal = 0;
-    let totalInstallationFee = 0; // เพิ่มตัวแปรเก็บค่าติดตั้งรวม
+    let totalInstallationFee = 0;
 
     const items = cartItems.map((item) => {
       const totalLine = Number(item.product.price) * item.quantity;
       subTotal += totalLine;
       
-      // ถ้ามีค่าติดตั้ง (สมมติ 500 บาทต่อชิ้น หรือต่อออเดอร์ ตาม Logic คุณ)
-      // ใน OrderService คุณคิด 500 ดังนั้นตรงนี้ควรโชว์ให้ตรงกัน
       if (item.requestInstallation) {
           totalInstallationFee += 500; 
       }
 
+      // ✅ แก้ตรงนี้: ส่ง product กลับไปทั้งก้อน (Frontend จะได้ใช้ item.product.name ได้)
       return {
-        id: item.id,
-        productId: item.product.id,
-        productName: item.product.name,
-        price: Number(item.product.price), // แปลงเป็น Number กันเหนียว
+        id: item.id,            // ID ของรายการในตะกร้า
         quantity: item.quantity,
-        total: totalLine,
-        image: item.product.image,
-        requestInstallation: item.requestInstallation
+        product: item.product,  // <--- ส่ง Object Product กลับไปตรงๆ
+        requestInstallation: item.requestInstallation,
+        total: totalLine        // (Optional) ส่งราคารวมต่อชิ้นไปด้วยก็ได้
       };
     });
 
-    // Logic คำนวณค่าส่งเดิมของคุณ
     const shippingFee = subTotal >= 5000 ? 0 : 150;
     
     return {
@@ -152,7 +148,7 @@ export class CartItemsService {
       summary: {
         subTotal: subTotal,
         shippingFee: shippingFee,
-        installationFee: totalInstallationFee, // ส่งค่าติดตั้งกลับไปโชว์ด้วย
+        installationFee: totalInstallationFee,
         grandTotal: subTotal + shippingFee + totalInstallationFee
       }
     };

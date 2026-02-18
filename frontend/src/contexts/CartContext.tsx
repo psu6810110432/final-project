@@ -1,72 +1,144 @@
-import { createContext, useContext, useState } from 'react';
-import type { ReactNode } from 'react'; // <--- แยก import type ออกมาบรรทัดนี้ เพื่อแก้ Error
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import * as api from '../services/api'; 
 
-// กำหนดหน้าตาของข้อมูลสินค้าในตะกร้า
+// 1. แก้ Interface CartItem ให้รองรับ ID แบบ String
 export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
+  id: number; // CartItem ID (มักจะเป็นตัวเลข 1, 2, 3...)
   quantity: number;
-  detail?: string; // ใส่เผื่อไว้ (Optional) กัน error หน้า Cart
+  product: {
+    id: string;   // ✅ แก้เป็น string (รองรับ UUID)
+    name: string;
+    price: number | string; // รองรับทั้งคู่กันเหนียว
+    description?: string;
+    images: string[] | string; // รองรับทั้ง Array หรือ JSON String
+    stock: number;
+  };
 }
 
-// กำหนดหน้าตาของ Context
+// 2. แก้ Interface Context ให้ Type ตรงกับ Function ที่เราจะเขียน
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: any, quantity: number) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
-  clearCart: () => void;
+  // ✅ addToCart รับ productId เป็น string
+  addToCart: (productId: string, quantity: number) => Promise<void>;
+  // ✅ removeFromCart รับ id เป็น number (เพราะลบที่ CartItem ID)
+  removeFromCart: (id: number) => Promise<void>;
+  // ✅ updateQuantity รับ id เป็น number
+  updateQuantity: (id: number, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  fetchCart: () => Promise<void>;
   cartTotal: number;
   cartCount: number;
+  isLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ฟังก์ชันเพิ่มสินค้า
-  const addToCart = (product: any, quantity: number) => {
-    setCartItems(currItems => {
-      const existingItem = currItems.find(item => item.id === product.id);
-      if (existingItem) {
-        return currItems.map(item =>
-          item.id === product.id 
-            ? { ...item, quantity: item.quantity + quantity } 
-            : item
-        );
+  const fetchCart = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        setCartItems([]);
+        return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await api.getCart();
+
+      // เช็คโครงสร้างข้อมูลที่ Backend ส่งมา
+      if (res.data && Array.isArray(res.data.items)) {
+         setCartItems(res.data.items);
+      } 
+      else if (Array.isArray(res.data)) {
+         setCartItems(res.data);
+      } 
+      else {
+         setCartItems([]); 
       }
-      return [...currItems, { ...product, quantity }];
-    });
-    alert(`เพิ่มลงตะกร้าแล้ว!`); 
+
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      setCartItems([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // ฟังก์ชันลบสินค้า
-  const removeFromCart = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  // 3. แก้ Function Implementation ให้รับ Type ตรงกับ Interface ด้านบน
+
+  // ✅ productId: string
+  const addToCart = async (productId: string, quantity: number) => {
+    try {
+      await api.addToCart(productId, quantity);
+      alert('เพิ่มลงตะกร้าแล้ว!');
+      await fetchCart(); 
+    } catch (error) {
+      console.error('Add to cart failed:', error);
+      alert('เกิดข้อผิดพลาดในการเพิ่มสินค้า');
+    }
   };
 
-  // ฟังก์ชันอัพเดทจำนวน
-  const updateQuantity = (id: number, newQuantity: number) => {
+  // ✅ id: number (CartItem ID)
+  const removeFromCart = async (id: number) => {
+    try {
+      await api.removeCartItem(id);
+      await fetchCart();
+    } catch (error) {
+      console.error('Remove item failed:', error);
+    }
+  };
+
+  // ✅ id: number (CartItem ID)
+  const updateQuantity = async (id: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-    setCartItems(items => 
-      items.map(item => item.id === id ? { ...item, quantity: newQuantity } : item)
-    );
+    try {
+      await api.updateCartItem(id, newQuantity);
+      await fetchCart();
+    } catch (error) {
+      console.error('Update quantity failed:', error);
+    }
   };
 
-  // ล้างตะกร้า
-  const clearCart = () => setCartItems([]);
+  const clearCart = async () => {
+    try {
+      await api.clearCart();
+      setCartItems([]);
+    } catch (error) {
+      console.error('Clear cart failed:', error);
+    }
+  };
 
-  // คำนวณราคารวม
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
+
+  const cartTotal = safeCartItems.reduce((total, item) => {
+    const price = Number(item?.product?.price || 0);
+    const quantity = Number(item?.quantity || 0);
+    return total + (price * quantity);
+  }, 0);
   
-  // นับจำนวนชิ้นทั้งหมด
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+  const cartCount = safeCartItems.reduce((count, item) => {
+    return count + Number(item?.quantity || 0);
+  }, 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount }}>
+    <CartContext.Provider value={{ 
+      cartItems: safeCartItems,
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      clearCart, 
+      fetchCart,
+      cartTotal, 
+      cartCount,
+      isLoading 
+    }}>
       {children}
     </CartContext.Provider>
   );
