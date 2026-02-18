@@ -1,10 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext"; // 1. Import Hook
+import { useAuth } from "../contexts/AuthContext"; 
+import { useCart } from "../contexts/CartContext"; // ✅ 1. เพิ่มบรรทัดนี้
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // 2. ดึง user และ logout function
+  const { user, logout } = useAuth();
+  const { resetCart } = useCart(); // ✅ 2. ดึง resetCart มาใช้ (ต้องไปเพิ่มใน CartContext ก่อนนะ)
+  
+  // *ถ้าใน CartContext ไม่มี resetCart ให้ใช้บรรทัดนี้แทนชั่วคราว:
+  // const { setCartItems } = useCart(); // (แต่วิธีนี้ต้องแก้ CartContext ให้ส่ง setCartItems ออกมาด้วย)
+
   const navigate = useNavigate();
   const [click, setClick] = useState(false);
 
@@ -12,14 +18,23 @@ const Navbar = () => {
   const closeMobileMenu = () => setClick(false);
 
   const handleLogout = () => {
-    logout();
+    // ✅ 3. ล้างตะกร้าหน้าบ้านทิ้งทันที
+    if (resetCart) {
+       resetCart(); 
+    }
+    
+    logout(); // ล้าง Token และ User
     closeMobileMenu();
-    navigate("/login"); // Logout แล้วเด้งไปหน้า Login
+    navigate("/login"); // เด้งไปหน้า Login
+    
+    // บังคับ Reload หน้าเว็บ 1 ที เพื่อความชัวร์ว่า State ทุกอย่างหายเกลี้ยง (Optional)
+    // window.location.reload(); 
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
+        {/* ... (ส่วน Logo เหมือนเดิม) ... */}
         <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
           HomeAlright
         </Link>
@@ -35,11 +50,9 @@ const Navbar = () => {
             </Link>
           </li>
           
-          {/* ส่วนเช็คสถานะ User */}
           {user ? (
             <>
-
-            {/* ---  เมนูสำหรับ Admin เท่านั้น --- */}
+               {/* ... (เมนู Admin เหมือนเดิม) ... */}
               {user.role === 'admin' && (
                 <li className="nav-item">
                   <Link to="/admin" className="nav-links" style={{ color: '#ff4d4d' }} onClick={closeMobileMenu}>
@@ -48,7 +61,6 @@ const Navbar = () => {
                 </li>
               )}
 
-              {/* เมนูสำหรับคน Login แล้ว */}
               <li className="nav-item">
                 <Link to="/cart" className="nav-links" onClick={closeMobileMenu}>
                   ตะกร้า
@@ -67,7 +79,7 @@ const Navbar = () => {
               <li className="nav-item">
                 <span 
                   className="nav-links cursor-pointer" 
-                  onClick={handleLogout}
+                  onClick={handleLogout} // ✅ เรียกใช้ handleLogout ที่เราแก้ข้างบน
                   style={{ cursor: 'pointer' }}
                 >
                   ออกจากระบบ
@@ -76,7 +88,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* เมนูสำหรับคนยังไม่ Login */}
               <li className="nav-item">
                 <Link to="/login" className="nav-links" onClick={closeMobileMenu}>
                   เข้าสู่ระบบ

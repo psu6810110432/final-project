@@ -26,6 +26,7 @@ interface CartContextType {
   updateQuantity: (id: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   fetchCart: () => Promise<void>;
+  resetCart: () => void;
   cartTotal: number;
   cartCount: number;
   isLoading: boolean;
@@ -127,6 +128,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return count + Number(item?.quantity || 0);
   }, 0);
 
+  const resetCart = () => {
+    setCartItems([]); // ล้างให้ว่างทันที
+  };
+
   return (
     <CartContext.Provider value={{ 
       cartItems: safeCartItems,
@@ -135,6 +140,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       updateQuantity, 
       clearCart, 
       fetchCart,
+      resetCart,
       cartTotal, 
       cartCount,
       isLoading 

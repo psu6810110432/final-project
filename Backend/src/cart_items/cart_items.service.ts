@@ -116,7 +116,7 @@ export class CartItemsService {
 
   async getCartSummary(userId: string) {
     const cartItems = await this.cartItemsRepository.find({
-      where: { user: { id: userId } },
+      where: { user: { id: userId } }, // ✅ ต้องกรองตาม userId
       relations: ['product'],
     });
 

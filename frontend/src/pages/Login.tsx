@@ -160,20 +160,23 @@
 
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext'; // ✅ 1. Import useCart
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const { login } = useAuth();
+  const { fetchCart } = useCart(); // ✅ 2. ดึงฟังก์ชัน fetchCart มาใช้
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login(formData);
+      await fetchCart(); // ✅ 3. สั่งดึงข้อมูลตะกร้าทันทีหลัง Login ผ่าน
       navigate('/');
     } catch (err) {
-      alert('Login Failed');
+      alert('Login Failed: ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     }
   };
 
@@ -228,7 +231,8 @@ const Login = () => {
           </form>
 
           <div className="mt-6 flex flex-col items-center gap-2 text-xs">
-            <p className="text-gray-500">ยังไม่มีบัญชีผู้ใช้? <Link to="/register" className="text-blue-500">ลงชื่อเข้าใช้</Link></p>
+            {/* แก้คำผิดตรงนี้ให้ด้วยครับ จาก "ลงชื่อเข้าใช้" เป็น "สมัครสมาชิก" */}
+            <p className="text-gray-500">ยังไม่มีบัญชีผู้ใช้? <Link to="/register" className="text-blue-500 font-bold">สมัครสมาชิก</Link></p>
             <p className="text-gray-400">ลืมรหัสผ่านใช่ไหม? <span className="text-blue-500 cursor-pointer">กดที่นี่</span></p>
           </div>
         </div>
