@@ -7,6 +7,7 @@ import Cart from './pages/Cart';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
+import OrderHistory from './pages/OrderHistory';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -24,6 +25,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/orders" element={<OrderHistory />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<AdminDashboard />} />
             </Routes>

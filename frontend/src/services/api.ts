@@ -27,7 +27,7 @@ export interface Product {
   price: number;
   stock: number;
   category: string;
-  images: string; // รับเป็น JSON string จาก Backend
+  image: string; // รับเป็น JSON string จาก Backend
 }
 
 export interface Category {
