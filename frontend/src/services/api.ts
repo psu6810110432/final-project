@@ -24,7 +24,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | string; // รองรับทั้ง number และ string กันเหนียว
   stock: number;
   category: string;
   image: string; // รับเป็น JSON string จาก Backend
