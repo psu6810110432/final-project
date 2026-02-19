@@ -36,8 +36,9 @@ export class CreateProductDto {
 
   // 👈 เพิ่ม stock เข้าไปในคลาสหลักด้วย เพราะหน้า Home เรียกใช้ค่านี้
   @IsNumber()
+  @IsOptional()
   @Type(() => Number) // 👈 เพิ่มบรรทัดนี้
-  stock: number;
+  stock?: number;
 
   @IsString()
   @IsOptional()

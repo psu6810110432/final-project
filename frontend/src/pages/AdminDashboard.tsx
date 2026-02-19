@@ -115,8 +115,10 @@ const AdminDashboard: React.FC = () => {
         alert("กรุณากรอกชื่อสินค้า, ราคา และเลือกหมวดหมู่");
         return;
       }
+      const totalStock = variants.reduce((sum, variant) => sum + (parseInt(variant.stock) || 0), 0);
       const payload = {
         name,
+        stock: totalStock, // ใช้ stock รวมจากทุก variant
         price: parseFloat(price),
         category: categoryId, 
         room: roomId,                 

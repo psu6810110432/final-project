@@ -49,10 +49,10 @@ const ProductDetail = () => {
   // --- แปลงรูปภาพ (รองรับทั้ง JSON String และ Array) ---
   let images: string[] = [];
   try {
-    if (Array.isArray(product.images)) {
-        images = product.images;
-    } else if (typeof product.images === 'string') {
-        images = JSON.parse(product.images);
+    if (Array.isArray(product.image)) {
+        images = product.image;
+    } else if (typeof product.image === 'string') {
+        images = JSON.parse(product.image);
     }
     // ถ้าไม่มีรูปเลย ให้ใส่รูป Placeholder
     if (images.length === 0) images = ["https://via.placeholder.com/600x400?text=No+Image"];
