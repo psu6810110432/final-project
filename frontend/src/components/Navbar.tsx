@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, User, LogOut, ClipboardList, Star, 
-  UserCircle, Armchair, LayoutDashboard 
+  UserCircle, Armchair, LayoutDashboard, Shield // เพิ่มไอคอน Shield
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -119,6 +119,16 @@ const Navbar = () => {
                     >
                       <Star size={18} />
                       รีวิวของฉัน
+                    </Link>
+
+                    {/* เพิ่มเมนูนโยบายความเป็นส่วนตัวตรงนี้ */}
+                    <Link 
+                      to="/policy" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#148F96]"
+                    >
+                      <Shield size={18} />
+                      นโยบายความเป็นส่วนตัว
                     </Link>
                     
                     <hr className="my-1 border-gray-100" />
