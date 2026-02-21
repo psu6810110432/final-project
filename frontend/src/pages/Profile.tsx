@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
+// 1. นำเข้า getProfile จาก api.ts ที่มีการตั้งค่า Endpoint ถูกต้องแล้ว
+import { getProfile } from '../services/api';
 
-// 1. ปรับ Interface ให้ตรงกับ User Entity ใน Backend ของคุณ
 interface UserProfile {
   id: string;
   username: string;
@@ -21,14 +21,19 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        // ดึงข้อมูล Profile ฉบับเต็มจาก Database ผ่าน API
-        const response = await api.get('/auth/profile'); 
-        setProfile(response.data);
+        // 2. เรียกใช้ฟังก์ชันดึงข้อมูลโปรไฟล์ ซึ่งจะยิงไปที่ /users/profile/me
+        const data = await getProfile(); 
+        setProfile(data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        // ถ้าดึงข้อมูลใหม่ไม่สำเร็จ ให้ใช้ข้อมูลจาก Context เท่าที่มีไปก่อนเพื่อป้องกันหน้าขาว
+        // ถ้าดึงข้อมูลใหม่ไม่สำเร็จ ให้ใช้ข้อมูลจาก Context มาแปลงให้ตรง Type ป้องกันหน้าขาว
         if (user) {
-          setProfile(user as any);
+          setProfile({
+            id: user.id || '',
+            username: user.username || 'Unknown',
+            email: '', 
+            role: user.role || 'user',
+          } as UserProfile);
         }
       } finally {
         setIsLoading(false);
@@ -36,12 +41,12 @@ const Profile: React.FC = () => {
     };
 
     fetchProfileData();
-  }, [user]);
+  }, [user?.id]); // ใช้ user?.id เพื่อป้องกันการยิง API รัวๆ ถ้าระบบ context อัปเดตบ่อย
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#148F96]"></div>
       </div>
     );
   }
@@ -59,17 +64,25 @@ const Profile: React.FC = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-8">บัญชีของฉัน</h1>
       
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* ส่วนหัวแสดงรูปโปรไฟล์ */}
-        <div className="h-32 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+        {/* ส่วนหัวแสดงรูปโปรไฟล์ ไล่สี #148F96 */}
+        <div className="h-32 bg-gradient-to-r from-[#148F96] to-[#107378]"></div>
         
         <div className="px-8 pb-8">
           <div className="relative flex justify-between items-end -mt-16 mb-8">
             <div className="flex items-end space-x-6">
               <div className="w-32 h-32 bg-white rounded-full p-1 shadow-md overflow-hidden">
                 {profile.userImage ? (
-                  <img src={profile.userImage} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                  <img 
+                    src={profile.userImage} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover rounded-full" 
+                    // ป้องกันภาพแตกกรณี URL มีปัญหา
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 ) : (
-                  <div className="w-full h-full bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-5xl font-bold uppercase">
+                  <div className="w-full h-full bg-[#148F96]/10 text-[#148F96] rounded-full flex items-center justify-center text-5xl font-bold uppercase">
                     {profile.username.charAt(0)}
                   </div>
                 )}
@@ -81,7 +94,7 @@ const Profile: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
+            <button className="px-6 py-2 bg-[#148F96] hover:bg-[#107378] text-white rounded-lg font-medium transition-colors shadow-sm">
               แก้ไขโปรไฟล์
             </button>
           </div>
@@ -91,14 +104,14 @@ const Profile: React.FC = () => {
           {/* ข้อมูลที่ดึงมาจาก Database */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-500">ชื่อผู้ใช้ (Username)</label>
+              <label className="text-sm font-medium text-gray-500">ชื่อผู้ใช้</label>
               <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
                 {profile.username}
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-500">อีเมล (Email)</label>
+              <label className="text-sm font-medium text-gray-500">อีเมล</label>
               <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
                 {profile.email || 'ไม่ได้ระบุ'}
               </div>
@@ -112,7 +125,7 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-500">ตำแหน่ง (Role)</label>
+              <label className="text-sm font-medium text-gray-500">ตำแหน่ง</label>
               <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 uppercase">
                 {profile.role}
               </div>
