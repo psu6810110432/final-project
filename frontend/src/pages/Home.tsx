@@ -299,7 +299,7 @@ export default Home;*/
 // frontend/src/pages/Home.tsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, SlidersHorizontal, Star, ShoppingCart, Heart, Loader } from 'lucide-react';
+import { ShoppingCart, Loader } from 'lucide-react';
 import * as api from '../services/api'; 
 import type { Product, Category, Room, Feature } from '../services/api';
 
@@ -311,10 +311,10 @@ const Home = () => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // --- STATE สำหรับการ Filter (เก็บ ID ที่ถูกเลือก) ---
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
-  const [selectedFeatures, setSelectedFeatures] = useState<number[]>([]);
+  // --- STATE สำหรับการ Filter (เก็บเป็นชื่อ string เพราะใน DB เก็บเป็น string) ---
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
   // --- FETCH DATA ---
   useEffect(() => {
@@ -344,30 +344,30 @@ const Home = () => {
 
   // --- FILTER LOGIC ---
   const filteredProducts = products.filter((product) => {
-    // กรองหมวดหมู่
+    // กรองหมวดหมู่ (เช็คด้วย String)
     const matchCategory =
       selectedCategories.length === 0 || 
-      (product.category && selectedCategories.includes(product.category.id));
+      (product.category && selectedCategories.includes(product.category));
 
-    // กรองห้อง
+    // กรองห้อง (เช็คด้วย String)
     const matchRoom =
       selectedRooms.length === 0 || 
-      (product.room && selectedRooms.includes(product.room.id));
+      (product.room && selectedRooms.includes(product.room));
 
-    // กรองคุณสมบัติ (สินค้าต้องมีคุณสมบัติ "อย่างน้อย 1 อย่าง" ที่ตรงกับที่เลือก)
+    // กรองคุณสมบัติ (product.features เป็น Array ของ String)
     const matchFeature =
       selectedFeatures.length === 0 ||
-      (product.features && product.features.some((f) => selectedFeatures.includes(f.id)));
+      (product.features && product.features.some((f) => selectedFeatures.includes(f)));
 
     return matchCategory && matchRoom && matchFeature;
   });
 
-  // --- TOGGLE HANDLERS ---
-  const handleToggle = (id: number, selectedList: number[], setList: React.Dispatch<React.SetStateAction<number[]>>) => {
-    if (selectedList.includes(id)) {
-      setList(selectedList.filter((itemId) => itemId !== id));
+  // --- TOGGLE HANDLERS (รับค่าเป็น string) ---
+  const handleToggle = (value: string, selectedList: string[], setList: React.Dispatch<React.SetStateAction<string[]>>) => {
+    if (selectedList.includes(value)) {
+      setList(selectedList.filter((item) => item !== value));
     } else {
-      setList([...selectedList, id]);
+      setList([...selectedList, value]);
     }
   };
 
@@ -441,8 +441,8 @@ const Home = () => {
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-[#148F96] focus:ring-[#148F96]"
-                    checked={selectedCategories.includes(cat.id)}
-                    onChange={() => handleToggle(cat.id, selectedCategories, setSelectedCategories)}
+                    checked={selectedCategories.includes(cat.name)}
+                    onChange={() => handleToggle(cat.name, selectedCategories, setSelectedCategories)}
                   />
                   <span>{cat.name}</span>
                 </li>
@@ -459,8 +459,8 @@ const Home = () => {
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-[#148F96] focus:ring-[#148F96]"
-                    checked={selectedRooms.includes(room.id)}
-                    onChange={() => handleToggle(room.id, selectedRooms, setSelectedRooms)}
+                    checked={selectedRooms.includes(room.name)}
+                    onChange={() => handleToggle(room.name, selectedRooms, setSelectedRooms)}
                   />
                   <span>{room.name}</span>
                 </li>
@@ -477,8 +477,8 @@ const Home = () => {
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-[#148F96] focus:ring-[#148F96]"
-                    checked={selectedFeatures.includes(feat.id)}
-                    onChange={() => handleToggle(feat.id, selectedFeatures, setSelectedFeatures)}
+                    checked={selectedFeatures.includes(feat.name)}
+                    onChange={() => handleToggle(feat.name, selectedFeatures, setSelectedFeatures)}
                   />
                   <span>{feat.name}</span>
                 </li>
@@ -492,7 +492,6 @@ const Home = () => {
         <main className="flex-1">
           
           <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
-              {/* เปลี่ยนไปนับจำนวนจาก filteredProducts แทน */}
               <div className="text-gray-500 text-sm">ค้นพบ <span className="text-gray-800 font-bold">{filteredProducts.length}</span> รายการ</div>
           </div>
 
@@ -518,8 +517,7 @@ const Home = () => {
                     {/* Content */}
                     <div className="p-4 flex flex-col flex-1">
                         <div className="text-xs text-[#148F96] font-bold mb-1">
-                           {/* แสดงชื่อหมวดหมู่ ถ้ามี */}
-                           {product.category?.name || 'ไม่มีหมวดหมู่'}
+                           {product.category || 'ไม่มีหมวดหมู่'}
                         </div>
                         <h3 className="font-bold text-gray-800 text-lg mb-1 truncate group-hover:text-[#D65A31] transition-colors">{product.name}</h3>
                         <p className="text-gray-500 text-xs mb-3 line-clamp-1">{product.description || "ไม่มีรายละเอียด"}</p>

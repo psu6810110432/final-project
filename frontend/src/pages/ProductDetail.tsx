@@ -211,7 +211,7 @@ const ProductDetail = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
              <h2 className="text-xl font-bold text-gray-800 mb-6">รายละเอียดเพิ่มเติม</h2>
              <p className="text-gray-600">
-                Category: {product.category?.name} <br/>
+                Category: {product.category} <br/>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
              </p>
         </div>

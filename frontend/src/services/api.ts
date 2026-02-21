@@ -26,9 +26,9 @@ export interface Product {
   description: string;
   price: number | string; // รองรับทั้ง number และ string กันเหนียว
   stock: number;
-  category?: Category; 
-  room?: Room;
-  features?: Feature[];
+  category?: string; 
+  room?: string;
+  features?: string[];
   image: string; // รับเป็น JSON string จาก Backend
 }
 
