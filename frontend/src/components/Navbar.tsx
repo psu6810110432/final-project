@@ -36,7 +36,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#148F96] shadow-md relative z-50">
+    <nav className="bg-[#148F96] shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* โลโก้แบบใหม่: มีรูปวงกลม ขอบสี #04A5E3 และข้อความ */}

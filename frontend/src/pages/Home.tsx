@@ -299,7 +299,8 @@ export default Home;*/
 // frontend/src/pages/Home.tsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Loader } from 'lucide-react';
+//  นำเข้าไอคอน Search เพิ่มเติม
+import { ShoppingCart, Loader, Search } from 'lucide-react';
 import * as api from '../services/api'; 
 import type { Product, Category, Room, Feature } from '../services/api';
 
@@ -311,17 +312,19 @@ const Home = () => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // --- STATE สำหรับการ Filter (เก็บเป็นชื่อ string เพราะใน DB เก็บเป็น string) ---
+  // --- STATE สำหรับการ Filter ---
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  
+  //  STATE สำหรับการค้นหา (Search)
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // ดึงข้อมูลทั้งหมดมาพร้อมกัน
         const [productsData, categoriesData, roomsData, featuresData] = await Promise.all([
           api.getAllProducts(),
           api.getAllCategories(),
@@ -342,27 +345,33 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // --- FILTER LOGIC ---
+  // --- FILTER & SEARCH LOGIC ---
   const filteredProducts = products.filter((product) => {
-    // กรองหมวดหมู่ (เช็คด้วย String)
+    // กรองหมวดหมู่
     const matchCategory =
       selectedCategories.length === 0 || 
       (product.category && selectedCategories.includes(product.category));
 
-    // กรองห้อง (เช็คด้วย String)
+    // กรองห้อง
     const matchRoom =
       selectedRooms.length === 0 || 
       (product.room && selectedRooms.includes(product.room));
 
-    // กรองคุณสมบัติ (product.features เป็น Array ของ String)
+    // กรองคุณสมบัติ
     const matchFeature =
       selectedFeatures.length === 0 ||
       (product.features && product.features.some((f) => selectedFeatures.includes(f)));
 
-    return matchCategory && matchRoom && matchFeature;
+    // กรองคำค้นหา (ค้นจากชื่อ และ รายละเอียด)
+    const matchSearch = 
+      searchTerm === '' ||
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    return matchCategory && matchRoom && matchFeature && matchSearch;
   });
 
-  // --- TOGGLE HANDLERS (รับค่าเป็น string) ---
+  // --- TOGGLE HANDLERS ---
   const handleToggle = (value: string, selectedList: string[], setList: React.Dispatch<React.SetStateAction<string[]>>) => {
     if (selectedList.includes(value)) {
       setList(selectedList.filter((item) => item !== value));
@@ -491,8 +500,23 @@ const Home = () => {
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1">
           
-          <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
-              <div className="text-gray-500 text-sm">ค้นพบ <span className="text-gray-800 font-bold">{filteredProducts.length}</span> รายการ</div>
+          {/*  แถบด้านบน: จำนวนรายการ & แถบค้นหา */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm gap-4">
+              <div className="text-gray-500 text-sm w-full sm:w-auto text-left">
+                ค้นพบ <span className="text-gray-800 font-bold">{filteredProducts.length}</span> รายการ
+              </div>
+              
+              {/* แถบค้นหา (Search Bar) */}
+              <div className="relative w-full sm:w-72">
+                <input 
+                  type="text" 
+                  placeholder="ค้นหาชื่อ หรือ รายละเอียด..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#04A5E3] transition text-sm bg-gray-50"
+                />
+                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+              </div>
           </div>
 
           {filteredProducts.length === 0 ? (
