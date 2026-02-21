@@ -235,6 +235,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import logoImg from '../assets/HomeAlright_logo.webp';
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', username: '', password: '', confirmPassword: '' });
@@ -258,6 +259,7 @@ const Register = () => {
       <div className="hidden lg:flex lg:w-3/4 relative">
         <img 
           src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1974" 
+          alt="Interior"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/30 flex flex-col justify-center px-20">
@@ -271,21 +273,46 @@ const Register = () => {
       {/* ฝั่งขวา: ฟอร์ม */}
       <div className="w-full lg:w-1/4 bg-[#99C4C8] flex items-center justify-center p-8">
         <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-xl flex flex-col items-center">
-          <div className="w-20 h-20 border-2 border-[#99C4C8] rounded-full flex items-center justify-center mb-4 text-[#99C4C8] text-4xl">🏠</div>
+          
+          {/* Logo/Icon แบบใหม่ */}
+          <img 
+            src={logoImg} 
+            alt="HomeAlright Logo" 
+            className="w-24 h-24 rounded-full border-[3px] border-[#04A5E3] bg-white object-contain p-2 shadow-sm mb-4"
+          />
+
           <h2 className="text-2xl font-bold text-gray-800 mb-6">ลงทะเบียน</h2>
 
           <form onSubmit={handleSubmit} className="w-full space-y-3">
-            <input type="email" placeholder="อีเมล" className="w-full p-3 bg-gray-50 border rounded-full outline-none" onChange={(e) => setFormData({...formData, email: e.target.value})} />
-            <input type="text" placeholder="ชื่อผู้ใช้" className="w-full p-3 bg-gray-50 border rounded-full outline-none" onChange={(e) => setFormData({...formData, username: e.target.value})} />
-            <input type="password" placeholder="รหัสผ่าน" className="w-full p-3 bg-gray-50 border rounded-full outline-none" onChange={(e) => setFormData({...formData, password: e.target.value})} />
-            <input type="password" placeholder="ยืนยันรหัสผ่าน" className="w-full p-3 bg-gray-50 border rounded-full outline-none" onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} />
+            <input 
+              type="email" placeholder="อีเมล" 
+              className="w-full p-3 bg-gray-50 border rounded-full outline-none focus:ring-2 focus:ring-orange-500" 
+              onChange={(e) => setFormData({...formData, email: e.target.value})} 
+            />
+            <input 
+              type="text" placeholder="ชื่อผู้ใช้" 
+              className="w-full p-3 bg-gray-50 border rounded-full outline-none focus:ring-2 focus:ring-orange-500" 
+              onChange={(e) => setFormData({...formData, username: e.target.value})} 
+            />
+            <input 
+              type="password" placeholder="รหัสผ่าน" 
+              className="w-full p-3 bg-gray-50 border rounded-full outline-none focus:ring-2 focus:ring-orange-500" 
+              onChange={(e) => setFormData({...formData, password: e.target.value})} 
+            />
+            <input 
+              type="password" placeholder="ยืนยันรหัสผ่าน" 
+              className="w-full p-3 bg-gray-50 border rounded-full outline-none focus:ring-2 focus:ring-orange-500" 
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} 
+            />
             
-            <button type="submit" className="w-full bg-[#D65A31] text-white py-3 rounded-full font-bold mt-4">
+            <button type="submit" className="w-full bg-[#D65A31] text-white py-3 rounded-full font-bold mt-4 shadow-lg hover:bg-[#b54622] transition">
               ลงทะเบียน
             </button>
           </form>
 
-          <p className="mt-6 text-xs text-gray-500">มีบัญชีผู้ใช้แล้ว? <Link to="/login" className="text-blue-500 font-bold underline">ลงชื่อเข้าใช้</Link></p>
+          <p className="mt-6 text-xs text-gray-500">
+            มีบัญชีผู้ใช้แล้ว? <Link to="/login" className="text-blue-500 font-bold underline">ลงชื่อเข้าใช้</Link>
+          </p>
         </div>
       </div>
     </div>
