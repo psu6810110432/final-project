@@ -231,7 +231,6 @@
 // };
 
 // export default Register;
-
 // frontend/src/pages/Register.tsx
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -241,6 +240,9 @@ import { Check, X } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', username: '', password: '', confirmPassword: '' });
+  // เพิ่ม State สำหรับ Checkbox นโยบายความเป็นส่วนตัว
+  const [isPolicyAccepted, setIsPolicyAccepted] = useState(false); 
+  
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -250,19 +252,21 @@ const Register = () => {
     uppercase: /[A-Z]/.test(formData.password),
     lowercase: /[a-z]/.test(formData.password),
     number: /[0-9]/.test(formData.password),
-    specialChar: /[!@#$%^&*_-]/.test(formData.password),
+    specialChar: /[!@#$%^&*]/.test(formData.password),
   };
 
-  // เช็คว่าผ่านทุกเงื่อนไขหรือไม่
   const isPasswordValid = Object.values(passwordRules).every(Boolean);
-  
-  // เช็คว่ารหัสผ่านตรงกันหรือไม่ (เช็คก็ต่อเมื่อมีการพิมพ์ช่องยืนยันรหัสผ่านแล้ว)
   const isPasswordMatch = formData.password === formData.confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ดักจับก่อนส่งข้อมูลไป API
+    // ดักจับกรณีผู้ใช้ปลดล็อกปุ่มผ่าน HTML แล้วพยายามกด Submit
+    if (!isPolicyAccepted) {
+      alert('กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนดำเนินการต่อ');
+      return;
+    }
+
     if (!isPasswordValid) {
       alert('กรุณาตั้งรหัสผ่านให้ตรงตามเงื่อนไขความปลอดภัยที่กำหนด');
       return;
@@ -282,7 +286,6 @@ const Register = () => {
     }
   };
 
-  // Component เล็กๆ สำหรับแสดงแต่ละเงื่อนไข
   const RuleItem = ({ isValid, text }: { isValid: boolean, text: string }) => (
     <div className={`flex items-center gap-1.5 transition-colors duration-300 ${isValid ? 'text-green-600' : 'text-red-500'}`}>
       {isValid ? <Check size={14} className="stroke-[3]" /> : <X size={14} className="stroke-[3]" />}
@@ -311,7 +314,6 @@ const Register = () => {
       <div className="w-full lg:w-1/4 bg-[#99C4C8] flex items-center justify-center p-8 overflow-y-auto">
         <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-xl flex flex-col items-center my-auto">
           
-          {/* Logo/Icon */}
           <img 
             src={logoImg} 
             alt="HomeAlright Logo" 
@@ -337,14 +339,13 @@ const Register = () => {
               onChange={(e) => setFormData({...formData, password: e.target.value})} 
             />
 
-            {/* --- แสดงเงื่อนไขรหัสผ่าน 5 ข้อ --- */}
             <div className="w-full bg-gray-50/80 p-3 rounded-2xl border border-gray-100 text-xs flex flex-col gap-1.5 shadow-sm">
               <p className="font-bold text-gray-700 mb-1">ความปลอดภัยของรหัสผ่าน:</p>
               <RuleItem isValid={passwordRules.length} text="ควรมีความยาวอย่างน้อย 12 ตัวอักษร" />
               <RuleItem isValid={passwordRules.uppercase} text="อักษรตัวพิมพ์ใหญ่ (A-Z)" />
               <RuleItem isValid={passwordRules.lowercase} text="อักษรตัวพิมพ์เล็ก (a-z)" />
               <RuleItem isValid={passwordRules.number} text="ตัวเลข (0-9)" />
-              <RuleItem isValid={passwordRules.specialChar} text="สัญลักษณ์พิเศษ (! @ # $ % ^ & * _ -)" />
+              <RuleItem isValid={passwordRules.specialChar} text="สัญลักษณ์พิเศษ (! @ # $ % ^ & *)" />
             </div>
 
             <div className="space-y-1">
@@ -353,14 +354,34 @@ const Register = () => {
                 className={`w-full p-3 bg-gray-50 border rounded-full outline-none focus:ring-2 focus:ring-orange-500 ${formData.confirmPassword && !isPasswordMatch ? 'border-red-500 focus:ring-red-500' : ''}`} 
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} 
               />
-              {/* แสดงข้อความเตือนเมื่อรหัสผ่านไม่ตรงกัน */}
               {formData.confirmPassword && !isPasswordMatch && (
                 <p className="text-red-500 text-xs px-3 py-1 font-medium">รหัสผ่านไม่ตรงกัน</p>
               )}
             </div>
+
+            {/* --- Checkbox ยอมรับนโยบายความเป็นส่วนตัว --- */}
+            <div className="flex items-start gap-2 px-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="policy" 
+                required
+                checked={isPolicyAccepted}
+                onChange={(e) => setIsPolicyAccepted(e.target.checked)}
+                className="mt-1 cursor-pointer accent-[#D65A31]" 
+              />
+              <label htmlFor="policy" className="text-xs text-gray-600 leading-tight">
+                ฉันยอมรับ
+                <Link to="/policy" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 font-bold underline mx-1">
+                  นโยบายความเป็นส่วนตัว
+                </Link>
+                ของทางเว็บไซต์
+              </label>
+            </div>
             
             <button 
               type="submit" 
+              // เช็คเงื่อนไข ปิดปุ่มถ้ายังไม่ติ๊ก หรือรหัสไม่ผ่าน
+              disabled={!isPolicyAccepted || !formData.password || !isPasswordValid || !isPasswordMatch} 
               className="w-full bg-[#D65A31] text-white py-3 rounded-full font-bold mt-4 shadow-lg hover:bg-[#b54622] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ลงทะเบียน
