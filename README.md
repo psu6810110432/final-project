@@ -1,112 +1,88 @@
-# 🛋️ HomeAlright E-Commerce Platform
+# HomeAlright E-Commerce Platform
 
-HomeAlright is a modern e-commerce platform for furniture and home goods. The system is divided into a robust backend API, a responsive frontend web application, and a dedicated automated testing suite.
+HomeAlright คือแพลตฟอร์มอีคอมเมิร์ซสำหรับขายเฟอร์นิเจอร์และของตกแต่งบ้าน ระบบถูกแบ่งการทำงานออกเป็น 3 ส่วนหลัก ได้แก่ Backend API, Frontend Web Application และระบบ Automated Testing
 
-## 🏗 Project Structure
+## โครงสร้างโปรเจกต์
 
-This repository contains the following main directories:
+* `frontend/`: โค้ดส่วนหน้าบ้าน พัฒนาด้วย React และ Vite
+* `Backend/`: โค้ดส่วนหลังบ้าน (API) และ Business Logic พัฒนาด้วย NestJS
+* `testing/`: สคริปต์สำหรับการทำ End-to-End (E2E) Testing ด้วย Playwright
 
-* `frontend/`: The client-side web application built with [React](https://react.dev/) and [Vite](https://vitejs.dev/).
-* `Backend/`: The core REST API and business logic built with [NestJS](https://nestjs.com/).
-* `testing/`: End-to-End (E2E) automated tests using [Playwright](https://playwright.dev/).
+## เทคโนโลยีที่ใช้
 
-## 🚀 Tech Stack
+**Frontend** ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-* **Frontend:** React, Vite, TypeScript, Tailwind CSS
-* **Backend:** Node.js, NestJS, TypeScript
-* **Database:** PostgreSQL (Neon)
-* **Tooling:** npm, ESLint, Prettier, PM2 (for production deployment)
-* **Testing:** Playwright (E2E Testing)
-* **Infrastructure:** Docker & Docker Compose (Backend services)
+**Backend** ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
-## 🛠 Prerequisites
+**Database** ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 
-Before you begin, ensure you have the following installed:
-* [Node.js](https://nodejs.org/) (v18 or higher recommended)
-* npm (comes with Node.js)
+**Testing** ![Playwright](https://img.shields.io/badge/playwright-%232EAD33.svg?style=for-the-badge&logo=playwright&logoColor=white)
+
+## สิ่งที่ต้องติดตั้งก่อนเริ่มงาน
+
+* [Node.js](https://nodejs.org/) (แนะนำเวอร์ชัน 18 ขึ้นไป)
+* npm (มาพร้อมกับ Node.js)
 * [Git](https://git-scm.com/)
-* Docker (Optional, for running local database services)
 
-## ⚙️ Getting Started
+## ขั้นตอนการติดตั้งและรันโปรเจกต์
 
-### 1. Clone the repository
+**1. Clone โปรเจกต์ลงเครื่อง**
 \`\`\`bash
 git clone https://github.com/psu6810110181/final-project.git
 cd final-project
 \`\`\`
 
-### 2. Setup Backend 
-Open a terminal and set up the backend application:
+**2. ตั้งค่าและรัน Backend**
+เปิด Terminal แล้วเข้าไปที่โฟลเดอร์ Backend:
 \`\`\`bash
 cd Backend
 npm install
 
-# Copy environment variables and configure them
+# คัดลอกไฟล์ Environment Variables และตั้งค่าให้เรียบร้อย
 cp .env.example .env
 
-# Start the development server
+# เริ่มรันเซิร์ฟเวอร์
 npm run start:dev
 \`\`\`
-*The Backend API will typically run on `http://localhost:3000` (or your configured port).*
+*(โดยปกติ Backend API จะทำงานอยู่ที่ `http://localhost:3000`)*
 
-### 3. Setup Frontend
-Open a new terminal window and set up the frontend application:
+**3. ตั้งค่าและรัน Frontend**
+เปิด Terminal หน้าต่างใหม่ แล้วเข้าไปที่โฟลเดอร์ frontend:
 \`\`\`bash
 cd frontend
 npm install
 
-# Copy environment variables (if applicable)
-cp .env.example .env
-
-# Start the frontend development server
+# เริ่มรันแอปพลิเคชันส่วนหน้าบ้าน
 npm run dev
 \`\`\`
-*The Frontend will typically be available at `http://localhost:5173`.*
+*(โดยปกติ Frontend จะทำงานอยู่ที่ `http://localhost:5173`)*
 
-### 4. Running End-to-End Tests
-To run the automated tests, open another terminal:
+**4. การรัน Automated Tests**
+หากต้องการทดสอบระบบ ให้เปิด Terminal ใหม่แล้วเข้าไปที่โฟลเดอร์ testing:
 \`\`\`bash
 cd testing
 npm install
-npx playwright install # Install required browsers for the first time
+npx playwright install # ติดตั้งเบราว์เซอร์ที่จำเป็น (ทำแค่ครั้งแรก)
 npx playwright test
 \`\`\`
 
-## 📜 Available Scripts
+## คำสั่งที่ใช้บ่อย
 
-Here are the most commonly used commands for development:
+**ในโฟลเดอร์ `/frontend`:**
+* `npm run dev`: รันโปรเจกต์จำลองสำหรับพัฒนา (Development Server)
+* `npm run build`: สร้างไฟล์สำหรับการนำไปใช้งานจริง (Production Build) ลงในโฟลเดอร์ `dist`
+* `npm run lint`: ตรวจสอบและค้นหาข้อผิดพลาดในโค้ด (ESLint)
 
-**In `/frontend`:**
-* `npm run dev`: Starts the Vite development server.
-* `npm run build`: Builds the app for production to the `dist` folder.
-* `npm run lint`: Runs ESLint to check code quality.
+**ในโฟลเดอร์ `/Backend`:**
+* `npm run start:dev`: รันเซิร์ฟเวอร์และรีสตาร์ทอัตโนมัติเมื่อมีการแก้โค้ด (Watch mode)
+* `npm run build`: คอมไพล์โปรเจกต์ NestJS
+* `npm run test`: รันการทดสอบระบบ (Unit tests)
 
-**In `/Backend`:**
-* `npm run start:dev`: Starts the NestJS server in watch mode.
-* `npm run build`: Compiles the NestJS application.
-* `npm run test`: Runs unit tests.
-
-**In `/testing`:**
-* `npx playwright test`: Runs all end-to-end tests.
-* `npx playwright show-report`: Views the detailed test report in your browser.
-
-## 🚀 Production Deployment (Server)
-
-If you are deploying this to a production server (e.g., Ubuntu via SSH), the basic workflow is:
-
-\`\`\`bash
-# Pull the latest code
-git pull origin main
-
-# Update Backend & Restart via PM2
-cd Backend
-npm install
-npm run build
-pm2 restart homealright-api --update-env
-
-# Update Frontend & Build
-cd ../frontend
-npm install
-npm run build
-# Serve the /dist folder using Nginx or Apache
-\`\`\`
+**ในโฟลเดอร์ `/testing`:**
+* `npx playwright test`: สั่งรัน E2E เทสต์ทั้งหมด
+* `npx playwright show-report`: ดูรายละเอียดผลการทดสอบผ่านเบราว์เซอร์
